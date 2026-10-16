@@ -61,19 +61,25 @@ On detection the guard:
 
 ## Install
 
-The package is a DSH **bundle** (`dsh.bundle.patch` → `cordis.patch.yml`, which inserts the
-`output-loop-guard` row). Install it into a profile with the official plugin manager:
+The package is a DSH **bundle**: the loader reads `dsh.bundle.patch` from `package.json`
+(`dsh.plugin.json` is optional metadata used by some local plugin indexes — the official runtime
+ignores it), and `cordis.patch.yml` inserts the `output-loop-guard` row.
 
 ```sh
-# from a local checkout
-dsh plugin --profile <profile> add /path/to/dsh-output-loop-guard
+# A. from a git host, pinned to a commit (requires `git` on the PATH of the DSH process)
+dsh plugin --profile <profile> add "github:ADistanceThereIs/dsh-output-loop-guard#<commit>"
 
-# or from a git host (plain JS, so no build step is required)
-dsh plugin --profile <profile> add github:ADistanceThereIs/dsh-output-loop-guard
+# B. from the release tarball — no git required
+#    download dsh-output-loop-guard-0.1.0.tgz from the Releases page, then:
+dsh plugin --profile <profile> add ./dsh-output-loop-guard-0.1.0.tgz
+
+# C. straight from the release asset URL (needs Node to trust your system CA store)
+dsh plugin --profile <profile> add \
+  https://github.com/ADistanceThereIs/dsh-output-loop-guard/releases/download/v0.1.0/dsh-output-loop-guard-0.1.0.tgz
 ```
 
-The command links the package into the profile, appends it to `dsh.profile.bundles` and composes
-the bundle's patch layer. **Restart DSH for the row to activate.**
+All three append the package to `dsh.profile.bundles` and compose the bundle's patch layer.
+**Restart DSH for the row to activate.**
 
 Uninstall:
 
@@ -180,6 +186,18 @@ dsh plugin --profile <profile> add "github:ADistanceThereIs/dsh-output-loop-guar
 ```
 
 Pin an exact commit (or tag) so a later push cannot silently change what runs on your machine.
+
+**`dsh plugin add https://…` fails with `fetch failed` / `unable to verify the first certificate`.**
+Node's `fetch` uses its bundled CA list, so TLS-inspecting security software (corporate proxies,
+some antivirus products) can break it while `curl` still works. Node 22.15+/24 can use the system
+trust store instead:
+
+```powershell
+$env:NODE_OPTIONS = '--use-system-ca'
+dsh plugin --profile <profile> add https://github.com/ADistanceThereIs/dsh-output-loop-guard/releases/download/v0.1.0/dsh-output-loop-guard-0.1.0.tgz
+```
+
+Downloading the tarball yourself and adding the local file avoids the issue entirely.
 
 **The guard tripped on output you wanted.**
 Set `dryRun: true` to keep detection but stop the cancellation, raise the thresholds, or set

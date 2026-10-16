@@ -42,17 +42,23 @@ DSH 的**输出自我重复看门狗**：模型流式输出出现退化循环时
 
 ## 安装
 
-本包是 DSH 的**组合包（bundle）**：`dsh.bundle.patch` → `cordis.patch.yml` 插入 `output-loop-guard` 行。用官方插件管理器安装：
+本包是 DSH 的**组合包（bundle）**：加载器只读 `package.json` 里的 `dsh.bundle.patch`
+（`dsh.plugin.json` 是可选元数据，供部分本地插件索引使用，**官方运行时不读取它**），由 `cordis.patch.yml` 插入 `output-loop-guard` 行。
 
 ```sh
-# 本地检出
-dsh plugin --profile <profile> add /path/to/dsh-output-loop-guard
+# A. 从 git 托管安装并固定 commit（需要 DSH 进程的 PATH 里有 git）
+dsh plugin --profile <profile> add "github:ADistanceThereIs/dsh-output-loop-guard#<commit>"
 
-# 或直接从 git 托管安装（纯 JS，无需构建步骤）
-dsh plugin --profile <profile> add github:ADistanceThereIs/dsh-output-loop-guard
+# B. 从 Release tarball 安装 —— 不需要 git
+#    先从 Releases 页下载 dsh-output-loop-guard-0.1.0.tgz，然后：
+dsh plugin --profile <profile> add ./dsh-output-loop-guard-0.1.0.tgz
+
+# C. 直接用 Release 资产 URL（需要 Node 信任系统 CA 库）
+dsh plugin --profile <profile> add \
+  https://github.com/ADistanceThereIs/dsh-output-loop-guard/releases/download/v0.1.0/dsh-output-loop-guard-0.1.0.tgz
 ```
 
-该命令会把包链接进 profile、追加到 `dsh.profile.bundles`，并合成 bundle 的 patch 层。**重启 DSH 后该行才会激活。**
+三种方式都会把包追加进 `dsh.profile.bundles` 并合成 bundle 的 patch 层。**重启 DSH 后该行才会激活。**
 
 卸载：
 
@@ -137,6 +143,16 @@ dsh plugin --profile <profile> add "github:ADistanceThereIs/dsh-output-loop-guar
 ```
 
 建议固定到具体 commit（或 tag），这样后续推送无法悄悄改变本机实际运行的代码。
+
+**`dsh plugin add https://…` 报 `fetch failed` / `unable to verify the first certificate`。**
+Node 的 `fetch` 用的是内置 CA 列表，因此做 HTTPS 检查的安全软件（企业代理、部分杀软）会破坏它，而 `curl` 仍然正常。Node 22.15+/24 可改用系统信任库：
+
+```powershell
+$env:NODE_OPTIONS = '--use-system-ca'
+dsh plugin --profile <profile> add https://github.com/ADistanceThereIs/dsh-output-loop-guard/releases/download/v0.1.0/dsh-output-loop-guard-0.1.0.tgz
+```
+
+自己下载 tarball 再安装本地文件可完全绕开该问题。
 
 **护栏掐掉了你本来想要的内容。**
 设 `dryRun: true`（只检测不中止）、放宽阈值，或设 `singleLineTextMinRepeats: 0` 关闭正文单行判定。
