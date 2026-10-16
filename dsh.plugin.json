@@ -1,0 +1,13 @@
+{
+  "id": "dsh-output-loop-guard",
+  "version": "0.1.0",
+  "main": "index.js",
+  "description": "Aborts a self-repeating model turn and wakes the agent with a corrective notice, so a degeneration loop cannot burn minutes of decode time.",
+  "engines": {
+    "dsh": ">=0.2.0-rc.2"
+  },
+  "contributes": {
+    "tools": [],
+    "skills": []
+  }
+}

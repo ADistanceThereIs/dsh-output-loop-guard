@@ -1,0 +1,67 @@
+{
+  "name": "dsh-output-loop-guard",
+  "version": "0.1.0",
+  "private": false,
+  "description": "DSH guard against self-repetition in streamed model output: detects a degeneration loop in reasoning or visible text, aborts the runaway turn and wakes the agent with a corrective notice.",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./detector": "./detector.mjs",
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "deepseek-harness-plugin",
+    "guard",
+    "repetition",
+    "loop-detection",
+    "agent-reliability"
+  ],
+  "files": [
+    "index.js",
+    "detector.mjs",
+    "cordis.patch.yml",
+    "dsh.plugin.json",
+    "README.md",
+    "README.zh.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "test/guard.test.mjs"
+  ],
+  "scripts": {
+    "test": "node test/guard.test.mjs"
+  },
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0",
+    "dsh": ">=0.2.0-rc.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ADistanceThereIs/dsh-output-loop-guard.git"
+  },
+  "homepage": "https://github.com/ADistanceThereIs/dsh-output-loop-guard#readme",
+  "bugs": {
+    "url": "https://github.com/ADistanceThereIs/dsh-output-loop-guard/issues"
+  },
+  "author": {
+    "name": "ADistanceThereIs",
+    "url": "https://github.com/ADistanceThereIs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-llm": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-llm": {
+      "optional": true
+    }
+  },
+  "license": "MIT"
+}

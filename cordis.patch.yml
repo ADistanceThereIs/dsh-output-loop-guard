@@ -1,0 +1,4 @@
+- insert:
+    - id: output-loop-guard
+      # Published/linked package name — the loader imports this specifier.
+      name: dsh-output-loop-guard
