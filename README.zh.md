@@ -126,6 +126,25 @@ dsh plugin --profile <profile> remove dsh-output-loop-guard
 - `Agent.cancel(cause, options)`：封闭原因集合为 `user | parent | disposed | hook`，`hook` 会把 reason 记入 `turn/end`——本插件使用 `hook`。
 - `Agent.steer()` 即 `send(message, 'next-step', true)`；当活动信号已被 abort 时，`send` 会把目标升级为 `next-turn` 并唤醒 driver，因此 `cancel(); steer(notice)` 等于"中止这次生成，然后用新一轮继续"。
 
+## 常见问题
+
+**`dsh plugin add github:…` 报 `resolveGit` / `resolveRef` 失败。**
+pnpm 解析 git 依赖要用 `git` 可执行文件，而 DSH 继承的是**启动它的那个进程**的环境变量。若你先启动 DSH、后安装 Git，新的 `PATH` 对已在运行的 DSH 不可见。把 Git 所在目录加进 shell 的 `PATH`（或重启 DSH）后重试：
+
+```powershell
+$env:PATH = 'C:\Program Files\Git\cmd;' + $env:PATH
+dsh plugin --profile <profile> add "github:ADistanceThereIs/dsh-output-loop-guard#<commit>"
+```
+
+建议固定到具体 commit（或 tag），这样后续推送无法悄悄改变本机实际运行的代码。
+
+**护栏掐掉了你本来想要的内容。**
+设 `dryRun: true`（只检测不中止）、放宽阈值，或设 `singleLineTextMinRepeats: 0` 关闭正文单行判定。
+
+**感觉护栏没生效。**
+bundle 的行需要**重启 DSH** 后才激活；对于非应用托管的 profile，可用
+`dsh --profile <profile> --dump-config | Select-String output-loop-guard` 确认该行已合成。
+
 ## 开发
 
 ```sh

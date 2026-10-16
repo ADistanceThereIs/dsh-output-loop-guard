@@ -167,6 +167,29 @@ and a throwing agent handle must not break the stream.
   aborted, `send` upgrades the target to `next-turn` and wakes the driver — hence
   `cancel(); steer(notice)` means "abort this generation, then continue in a new turn".
 
+## Troubleshooting
+
+**`dsh plugin add github:…` fails with `resolveGit` / `resolveRef` errors.**
+pnpm resolves git dependencies with the `git` executable, and DSH inherits the environment of
+the process that started it. If you installed Git *after* starting DSH, the new `PATH` entry is
+not visible to it. Put Git on the `PATH` of the shell you use (or restart DSH) and retry, e.g.:
+
+```powershell
+$env:PATH = 'C:\Program Files\Git\cmd;' + $env:PATH
+dsh plugin --profile <profile> add "github:ADistanceThereIs/dsh-output-loop-guard#<commit>"
+```
+
+Pin an exact commit (or tag) so a later push cannot silently change what runs on your machine.
+
+**The guard tripped on output you wanted.**
+Set `dryRun: true` to keep detection but stop the cancellation, raise the thresholds, or set
+`singleLineTextMinRepeats: 0` to stop judging single-line repetition in visible text.
+
+**The guard seems inactive.**
+The bundle's row only activates after a DSH restart, and the row must appear in the composed
+profile — for a non-application profile you can check it with
+`dsh --profile <profile> --dump-config | Select-String output-loop-guard`.
+
 ## Development
 
 ```sh
